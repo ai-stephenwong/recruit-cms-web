@@ -46,4 +46,9 @@ export const adminApi = {
   updateArticle: (id: number, data: Partial<Article>) =>
     req<{ data: Article }>(`/api/articles/${id}`, { method: 'PUT', body: JSON.stringify(data) }).then(r => r.data),
   deleteArticle: (id: number) => req<{ message: string }>(`/api/articles/${id}`, { method: 'DELETE' }),
+  getApplications: async (params?: Record<string, string>) => {
+    const qs = params ? '?' + new URLSearchParams(params).toString() : ''
+    const r = await req<{ data: any[]; pagination: { total: number } }>(`/api/applications${qs}`)
+    return { applications: r.data, total: r.pagination.total }
+  },
 }

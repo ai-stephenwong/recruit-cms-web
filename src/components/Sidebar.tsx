@@ -6,6 +6,7 @@ import { clearAuth } from '@/lib/auth'
 const NAV = [
   { href: '/dashboard', label: 'Dashboard', icon: '📊' },
   { href: '/dashboard/jobs', label: 'Jobs', icon: '💼' },
+  { href: '/dashboard/applications', label: 'Applications', icon: '📋' },
   { href: '/dashboard/users', label: 'Users', icon: '👥' },
   { href: '/dashboard/employers', label: 'Employers', icon: '🏢' },
   { href: '/dashboard/content', label: 'Content', icon: '📝' },
