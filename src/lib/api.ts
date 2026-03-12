@@ -14,29 +14,36 @@ async function req<T>(path: string, options: RequestInit = {}): Promise<T> {
 }
 
 export const authApi = {
-  login: (email: string, password: string) =>
-    req<{ token: string; user: User }>('/api/auth/login', { method: 'POST', body: JSON.stringify({ email, password }) }),
-  me: () => req<User>('/api/auth/me'),
+  login: async (email: string, password: string) => {
+    const r = await req<{ access_token: string; user: User }>('/api/auth/login', { method: 'POST', body: JSON.stringify({ email, password }) })
+    return { token: r.access_token, user: r.user }
+  },
+  me: () => req<{ user: User }>('/api/auth/me').then(r => r.user),
 }
 
 export const adminApi = {
   getAnalytics: () => req<Analytics>('/api/admin/analytics'),
-  getJobs: (params?: Record<string, string>) => {
+  getJobs: async (params?: Record<string, string>) => {
     const qs = params ? '?' + new URLSearchParams(params).toString() : ''
-    return req<{ jobs: Job[]; total: number }>(`/api/admin/jobs${qs}`)
+    const r = await req<{ data: Job[]; pagination: { total: number } }>(`/api/admin/jobs${qs}`)
+    return { jobs: r.data, total: r.pagination.total }
   },
-  getUsers: (params?: Record<string, string>) => {
+  getUsers: async (params?: Record<string, string>) => {
     const qs = params ? '?' + new URLSearchParams(params).toString() : ''
-    return req<{ users: User[]; total: number }>(`/api/admin/users${qs}`)
+    const r = await req<{ data: User[]; pagination: { total: number } }>(`/api/admin/users${qs}`)
+    return { users: r.data, total: r.pagination.total }
   },
   deleteUser: (id: number) => req<{ message: string }>(`/api/admin/users/${id}`, { method: 'DELETE' }),
   updateJob: (id: number, data: Partial<Job>) =>
-    req<Job>(`/api/jobs/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+    req<{ data: Job }>(`/api/jobs/${id}`, { method: 'PUT', body: JSON.stringify(data) }).then(r => r.data),
   deleteJob: (id: number) => req<{ message: string }>(`/api/jobs/${id}`, { method: 'DELETE' }),
-  getArticles: () => req<{ articles: Article[] }>('/api/articles'),
+  getArticles: async () => {
+    const r = await req<{ data: Article[]; pagination: { total: number } }>('/api/articles')
+    return { articles: r.data }
+  },
   createArticle: (data: Partial<Article>) =>
-    req<Article>('/api/articles', { method: 'POST', body: JSON.stringify(data) }),
+    req<{ data: Article }>('/api/articles', { method: 'POST', body: JSON.stringify(data) }).then(r => r.data),
   updateArticle: (id: number, data: Partial<Article>) =>
-    req<Article>(`/api/articles/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+    req<{ data: Article }>(`/api/articles/${id}`, { method: 'PUT', body: JSON.stringify(data) }).then(r => r.data),
   deleteArticle: (id: number) => req<{ message: string }>(`/api/articles/${id}`, { method: 'DELETE' }),
 }
